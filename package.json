@@ -1,0 +1,13 @@
+{
+  "name": "@blockmason/deployment-tracker",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": {
+    "email": "devin@blockmason.io",
+    "name": "Devin Canterberry"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@blockmason/link-sdk": "0.1.4"
+  }
+}
