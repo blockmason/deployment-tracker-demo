@@ -1,85 +1,63 @@
 pragma solidity 0.5.8;
 
 
-contract DeploymentTracker {
-  struct Deployment {
-    uint256 id;
-    address reporter;
-    string app;
-    string version;
-    string environment;
-    string target;
-    uint256 startedAt;
-    uint256 endedAt;
-    uint8 status;
-    string message;
-  }
+contract DeploymentStatus {
+    mapping (uint256 => string) private appLabel;
+    mapping (uint256 => string) private environmentLabel;
+    mapping (uint256 => mapping (uint256 => uint256)) private pendingNodeCount;
+    mapping (uint256 => mapping (uint256 => uint256)) private totalNodeCount;
+    mapping (uint256 => mapping (uint256 => string)) private pendingVersion;
+    mapping (uint256 => mapping (uint256 => string)) private liveVersion;
 
-  uint8 constant STATUS_UNKNOWN = 0x0;
-  uint8 constant STATUS_PENDING = 0x1;
-  uint8 constant STATUS_FAILED = 0x2;
-  uint8 constant STATUS_SUCCESS = 0x3;
+    function startDeployment(uint256 app, uint256 environment, string memory version) public {
+        string memory pending = pendingVersion[app][environment];
+        string memory live = liveVersion[app][environment];
 
-  mapping (uint256 => Deployment) public deployments;
+        if (keccak256(abi.encodePacked(pending)) != keccak256(abi.encodePacked(live))) {
+            require(keccak256(abi.encodePacked(version)) == keccak256(abi.encodePacked(pending)));
+        }
 
-  event DeploymentStart(uint256 id, address reporter, string indexed app, string version, string indexed environment, string indexed target, uint256 startedAt);
-  event DeploymentComplete(uint256 id, uint256 endedAt, string message);
-  event DeploymentFail(uint256 id, uint256 endedAt, string message);
-  event DeploymentSuccess(uint256 id, uint256 endedAt, string message);
+        pendingVersion[app][environment] = version;
+        pendingNodeCount[app][environment] += 1;
+        totalNodeCount[app][environment] += 1;
+    }
 
-  function isPending(uint256 id) public view returns (bool result) {
-    return deployments[id].status == STATUS_PENDING;
-  }
+    function stopDeployment(uint256 app, uint256 environment) public {
+        require(pendingNodeCount[app][environment] > 0);
 
-  function isFailed(uint256 id) public view returns (bool result) {
-    return deployments[id].status == STATUS_FAILED;
-  }
+        pendingNodeCount[app][environment] -= 1;
 
-  function isSuccess(uint256 id) public view returns (bool result) {
-    return deployments[id].status == STATUS_SUCCESS;
-  }
+        if (pendingNodeCount[app][environment] == 0) {
+            totalNodeCount[app][environment] = 0;
+            liveVersion[app][environment] = pendingVersion[app][environment];
+        }
+    }
 
-  function isComplete(uint256 id) public view returns (bool result) {
-    return isFailed(id) || isSuccess(id);
-  }
+    function getAppLabel(uint256 id) public view returns (string memory app) {
+        return appLabel[id];
+    }
 
-  function start(uint256 id, string memory app, string memory version, string memory environment, string memory target) public {
-    require(deployments[id].status == STATUS_UNKNOWN);
+    function setAppLabel(uint256 id, string memory label) public {
+        appLabel[id] = label;
+    }
 
-    Deployment storage deployment = deployments[id];
+    function getEnvironmentLabel(uint256 id) public view returns (string memory environment) {
+        return environmentLabel[id];
+    }
 
-    deployment.id = id;
-    deployment.reporter = msg.sender;
-    deployment.app = app;
-    deployment.version = version;
-    deployment.environment = environment;
-    deployment.target = target;
-    deployment.startedAt = block.timestamp;
-    deployment.status = STATUS_PENDING;
+    function setEnvironmentLabel(uint256 id, string memory label) public {
+        environmentLabel[id] = label;
+    }
 
-    emit DeploymentStart(id, msg.sender, app, version, environment, target, block.timestamp);
-  }
+    function getVersion(uint256 app, uint256 environment) public view returns (string memory version) {
+        return liveVersion[app][environment];
+    }
 
-  function success(uint256 id, string memory message) public {
-    complete(id, STATUS_SUCCESS, message);
-    emit DeploymentSuccess(id, block.timestamp, message);
-  }
-
-  function fail(uint256 id, string memory message) public {
-    complete(id, STATUS_FAILED, message);
-    emit DeploymentFail(id, block.timestamp, message);
-  }
-
-  function complete(uint256 id, uint8 status, string memory message) internal {
-    require(deployments[id].status == STATUS_PENDING);
-    require(deployments[id].reporter == msg.sender);
-
-    Deployment storage deployment = deployments[id];
-
-    deployment.endedAt = block.timestamp;
-    deployment.status = status;
-    deployment.message = message;
-
-    emit DeploymentComplete(id, block.timestamp, message);
-  }
+    function getPendingVersion(uint256 app, uint256 environment) public view returns (string memory version, uint256 progress, uint256 total) {
+        uint256 pending = pendingNodeCount[app][environment];
+        total = totalNodeCount[app][environment];
+        progress = total - pending;
+        version = progress == total ? liveVersion[app][environment] : pendingVersion[app][environment];
+        return (version, progress, total);
+    }
 }

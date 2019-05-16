@@ -7,7 +7,31 @@
     "name": "Devin Canterberry"
   },
   "license": "MIT",
+  "scripts": {
+    "build": "parcel build --no-autoinstall --no-source-maps --out-dir=lib src/index.html",
+    "lint": "eslint src",
+    "start": "parcel serve --no-autoinstall --no-hmr --https --out-dir=lib src/index.html"
+  },
   "dependencies": {
-    "@blockmason/link-sdk": "0.1.4"
+    "@blockmason/link-sdk": "0.1.4",
+    "prop-types": "15.7.2",
+    "react": "16.8.6",
+    "react-dom": "16.8.6",
+    "react-redux": "7.0.3",
+    "redux": "4.0.1",
+    "redux-thunk": "2.3.0",
+    "styled-components": "4.2.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "7.4.4",
+    "@babel/core": "7.4.4",
+    "@babel/preset-env": "7.4.4",
+    "@babel/preset-react": "7.0.0",
+    "@babel/register": "7.4.4",
+    "babel-eslint": "10.0.1",
+    "eslint": "5.16.0",
+    "eslint-plugin-ante": "1.0.2",
+    "eslint-plugin-react": "7.13.0",
+    "parcel-bundler": "1.12.3"
   }
 }
