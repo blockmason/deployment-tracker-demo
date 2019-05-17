@@ -4,6 +4,16 @@ import React from 'react';
 import { connect } from 'react-redux';
 import getPendingVersion from '../redux/actions/get-pending-version';
 import getVersion from '../redux/actions/get-version';
+import styled from 'styled-components';
+
+const Pending = styled.div`
+  color: #c06000;
+`;
+
+const Live = styled.div`
+  color: #008000;
+  font-weight: 700;
+`;
 
 class DeploymentStatus extends React.Component {
   static get propTypes() {
@@ -33,10 +43,10 @@ class DeploymentStatus extends React.Component {
   render() {
     const { props: { pendingVersion, progress, total, version } } = this;
     if (progress === total) {
-      return <div>{version}</div>;
+      return <Live>{version}</Live>;
     }
 
-    return <div>{version} ➡ {pendingVersion} ({progress}/{total})</div>;
+    return <Pending>{version} ➡ {pendingVersion} ({progress}/{total})</Pending>;
   }
 }
 

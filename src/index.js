@@ -1,5 +1,6 @@
 import DeploymentStatusTable from './deployment-status-table';
 import Initializer from './redux/initializer';
+import Layout from './layout';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
@@ -22,6 +23,8 @@ const Redux = createRedux({
 render(<ThemeProvider theme={theme}>
   <Redux>
     <Initializer/>
-    <DeploymentStatusTable/>
+    <Layout>
+      <DeploymentStatusTable/>
+    </Layout>
   </Redux>
 </ThemeProvider>, document.querySelector('div'));
