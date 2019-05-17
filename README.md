@@ -6,6 +6,8 @@ services across your infrastructure. It serves as a reference
 implementation for those who may want to build a similar app using
 Blockmason Link.
 
+![Demo Screenshot](https://raw.githubusercontent.com/blockmason/deployment-tracker-demo/master/demo.png)
+
 ## Usage
 
 > 💡 **Note:** This app requires some configuration before launching.
